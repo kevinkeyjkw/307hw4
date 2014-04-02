@@ -40,8 +40,14 @@ class Var(Node):
     fields = ['name']
     
     def eval(self):
-        return self.name
-    
+        if self.name in local_var_env:
+            return local_var_env[self.name]
+        elif self.name in global_var_env:
+            return global_var_env[self.name]
+        else:
+            raise EvalError()
+#Is it okay to access local_var_env globally like this?
+#    
 class Int(Node):
     """Class of nodes representing integer literals."""
     fields = ['value']
@@ -125,7 +131,7 @@ class Print(Node):
 
     def exec(self, local_var_env, is_global):
         print(repr(self.exp.eval()))
-
+#I'm printing out a, but a=4. Find a way to print value 
 class Assign(Node):
     """Class of nodes representing assignment statements."""
     fields = ['left', 'right']
@@ -134,11 +140,11 @@ class Assign(Node):
     
     def exec(self, local_var_env, is_global):
         if(is_global):
-            if(not isinstance(self.left,Index)):
-                global_var_env[self.left.eval()] = self.right.eval()
+            if(isinstance(self.left,Var)):
+                global_var_env[self.left.name] = self.right.eval()
         else:
-            if(not isinstance(self.left,Index)):
-                local_var_env[self.left.eval()] = self.right.eval()
+            if(isinstance(self.left,Var)):
+                local_var_env[self.left.name] = self.right.eval()
             		
 
 class Block(Node):
@@ -197,6 +203,7 @@ class Call(Node):
         assert(len(proc_env[self.name][0]) == len(self.args))
         for x,y in zip(proc_env[self.name][0],self.args):
             local_var_env[x]=y.eval()
+        proc_env[self.name][1].exec(local_var_env,is_global)
             
 #Function called, params belong in local
 #Var in body of function belong in local        

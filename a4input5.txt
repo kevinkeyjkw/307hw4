@@ -1,7 +1,10 @@
 {
-def func(a){
-print(a);
-}
-func(4);
+#def func(a){
+#print(a);
+#}
+#func(4);
+i = 4;
+j = 5;
+print(i+j);
 }
 
