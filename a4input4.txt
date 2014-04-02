@@ -1,0 +1,23 @@
+{
+    print("Computing Solutions to Eight Queens Puzzle:");
+    n = 8;
+    s = [0,0,0,0,0,0,0,0];
+    def queen(i) {
+        if (i == n)
+	    print(s);
+        if (i < n) {
+            j = 0;
+            while (j < n) {
+    	        safe = 1;
+    	        k = 0;
+    	        while (k < i and safe) {
+    		    if (j==s[k] or j==s[k]+i-k or j==s[k]-i+k)
+    		        safe = 0;
+    		    k = k + 1; }
+                if (safe) {
+    	            s[i] = j;
+    		    queen(i+1); }
+    	        j = j + 1; } } }
+
+    queen(0);
+}

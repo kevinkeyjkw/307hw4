@@ -1,0 +1,41 @@
+{
+    # test a procedure definition and a procedure call
+    def p(x1,x2,x3,x4)
+    	print [x1,x2,x3,x4];
+    p(1,2,3,4);
+
+    # uncomment to test Evaluation Error (redefining already defined procedure p)
+    # def p()
+    #  print "define p";
+
+    # uncomment to test Evaluation Error (calling undefined procedure q)
+    # q(4);
+
+    # test a procedure call to a procedure defined later
+    g(1,2);
+
+    # test a variable definition and a variable use
+    y = 1;
+    print y;
+
+    # uncomment to test Evaluation Error (using undefined var x in global scope)
+    # z = x;
+
+    # uncomment to test Evaluation Error (using undefined var x in local scope)
+    # def f()
+    #   print x+y;
+
+    # test shadowing of global variable y by a parameter
+    def g(x,y)
+       print x+y;
+    g(3,y);
+
+    # test shadowing of global variable y by a local variable
+    def g0(x) {
+       y = 0;
+       print x+y;
+    }
+    g0(3);
+
+    # try to test the possible kinds of errors in nested scopes too
+}
