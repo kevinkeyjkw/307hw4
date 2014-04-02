@@ -180,13 +180,28 @@ class Def(Node):
     def anlz_procs(self):
         proc_env[self.name] = (self.params, self.body)
         self.body.anlz_procs()
-
+        
+    def exec(self, local_var_env, is_global):
+        pass
+#Does Def need an exec? 
+#
 class Call(Node):
     """Class of nodes representing precedure calls."""
     fields = ['name', 'args']
 
     def anlz_procs(self): pass
-
+    
+    def exec(self, local_var_env, is_global):
+        if self.name not in proc_env:
+            raise EvalError()
+        assert(len(proc_env[self.name][0]) == len(self.args))
+        for x,y in zip(proc_env[self.name][0],self.args):
+            local_var_env[x]=y.eval()
+            
+#Function called, params belong in local
+#Var in body of function belong in local        
+#Var used in body of function, if not in local then in global, else error
+#
 class Parser(tpg.Parser):
     r"""
     token int:         '\d+' ;
