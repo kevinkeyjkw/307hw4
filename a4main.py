@@ -39,6 +39,9 @@ class Var(Node):
     """Class of nodes representing accesses of variable."""
     fields = ['name']
     
+    def eval(self):
+        return self.name
+    
 class Int(Node):
     """Class of nodes representing integer literals."""
     fields = ['value']
@@ -115,7 +118,7 @@ class UniOpExp(Node):
 
 class Print(Node):
     """Class of nodes representing print statements."""
-    pdb.set_trace()
+    
     fields = ['exp']
 
     def anlz_procs(self): pass
@@ -128,6 +131,15 @@ class Assign(Node):
     fields = ['left', 'right']
     
     def anlz_procs(self): pass
+    
+    def exec(self, local_var_env, is_global):
+        if(is_global):
+            if(not isinstance(self.left,Index)):
+                global_var_env[self.left.eval()] = self.right.eval()
+        else:
+            if(not isinstance(self.left,Index)):
+                local_var_env[self.left.eval()] = self.right.eval()
+            		
 
 class Block(Node):
     """Class of nodes representing block statements."""
@@ -135,6 +147,11 @@ class Block(Node):
 
     def anlz_procs(self):
         for s in self.stmts: s.anlz_procs()
+    
+    def exec(self, local_var_env, is_global):
+        for s in self.stmts:
+            s.exec(local_var_env, is_global)
+            #pdb.set_trace()
 
 class If(Node):
     """Class of nodes representing if statements."""
@@ -151,6 +168,10 @@ class While(Node):
     fields = ['exp', 'stmt']
 
     def anlz_procs(self): self.stmt.anlz_procs()
+    
+    def exec(self, local_var_env, is_global):
+        while(self.exp.eval() != 0):
+            self.stmt.exec(local_var_env, is_global)
 
 class Def(Node):
     """Class of nodes representing procedure definitions."""
@@ -223,6 +244,7 @@ def parse(code):
 prog = open(sys.argv[1]).read()
 
 try:
+    pdb.set_trace()
     # Try to parse the program.
     print('Parsing...')
     node = parse(prog)
