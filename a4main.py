@@ -151,10 +151,20 @@ class Assign(Node):
             if(isinstance(self.left,Var)):
                 local_var_env[self.left.name] = self.right.eval(local_var_env)
             elif(isinstance(self.left,Index)):
-                if self.left.indexable.name not in local_var_env or self.left.index.eval(local_var_env) >= len(local_var_env[self.left.indexable.name]):
-                    raise EvalError()
-                else:
+                if  self.left.indexable.name in local_var_env:
+                    if  self.left.index.eval(local_var_env) >= len(local_var_env[self.left.indexable.name]):
+                        raise EvalError()
                     local_var_env[self.left.indexable.name][self.left.index.eval(local_var_env)] = self.right.eval(local_var_env)
+                elif self.left.indexable.name in global_var_env:
+                    if self.left.index.eval(local_var_env) >= len(global_var_env[self.left.indexable.name]):
+                        raise EvalError()
+                    global_var_env[self.left.indexable.name][self.left.index.eval(local_var_env)] = self.right.eval(local_var_env)
+                else:
+                    raise EvalError()
+               #  if self.left.indexable.name not in global_var_env or self.left.indexable.name not in local_var_env or self.left.index.eval(local_var_env) >= len(local_var_env[self.left.indexable.name]):
+#                     raise EvalError()
+#                 else:
+#                     local_var_env[self.left.indexable.name][self.left.index.eval(local_var_env)] = self.right.eval(local_var_env)
 
 class Block(Node):
     """Class of nodes representing block statements."""
@@ -220,7 +230,7 @@ class Call(Node):
             #local_var_env[x]=y.eval()
             localVars[x] = y.eval(local_var_env)
         #proc_env[self.name][1].exec(local_var_env,is_global)
-        proc_env[self.name][1].exec(localVars,is_global)
+        proc_env[self.name][1].exec(localVars,False)
 #Shouldn't I pass false for                       -- ^  ?           
 #Function called, params belong in local
 #Var in body of function belong in local        
