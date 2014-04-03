@@ -2,6 +2,8 @@
     print("Computing Solutions to Eight Queens Puzzle:");
     n = 8;
     s = [0,0,0,0,0,0,0,0];
+    print n;
+    print s;
     def queen(i) {
         if (i == n)
 	    print(s);

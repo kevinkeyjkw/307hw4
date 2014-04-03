@@ -2,10 +2,7 @@
 def func(a){
 print(a);
 }
-func(4);
-def func(b){
-i=7;
-}
+
 #a = [1,2];
 #a[2] = 4;
 

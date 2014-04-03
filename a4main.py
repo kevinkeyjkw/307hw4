@@ -39,7 +39,7 @@ class Var(Node):
     """Class of nodes representing accesses of variable."""
     fields = ['name']
     
-    def eval(self):
+    def eval(self,local_var_env):
         if self.name in local_var_env:
             return local_var_env[self.name]
         elif self.name in global_var_env:
@@ -52,27 +52,27 @@ class Int(Node):
     """Class of nodes representing integer literals."""
     fields = ['value']
     
-    def eval(self): return self.value
+    def eval(self,local_var_env): return self.value
 
 class String(Node):
     """Class of nodes representing string literals."""
     fields = ['value']
     
-    def eval(self): return self.value
+    def eval(self,local_var_env): return self.value
 
 class Array(Node):
     """Class of nodes representing array literals."""
     fields = ['elements']
 
-    def eval(self): return [e.eval() for e in self.elements]
+    def eval(self,local_var_env): return [e.eval(local_var_env) for e in self.elements]
         
 class Index(Node):
     """Class of nodes representing indexed accesses of arrays or strings."""
     fields = ['indexable', 'index']
 
-    def eval(self):
-        v1 = self.indexable.eval()
-        v2 = self.index.eval()
+    def eval(self,local_var_env):
+        v1 = self.indexable.eval(local_var_env)
+        v2 = self.index.eval(local_var_env)
 
         if not isinstance(v1,(str,list)): raise EvalError()
         if not isinstance(v2,int): raise EvalError()
@@ -84,9 +84,9 @@ class BinOpExp(Node):
     """Class of nodes representing binary-operation expressions."""
     fields = ['left', 'op', 'right']
     
-    def eval(self):
-        v1 = self.left.eval()
-        v2 = self.right.eval()
+    def eval(self,local_var_env):
+        v1 = self.left.eval(local_var_env)
+        v2 = self.right.eval(local_var_env)
 
         if self.op == '+': 
             if isinstance(v1,int) and isinstance(v2,int): return v1 + v2
@@ -114,8 +114,8 @@ class UniOpExp(Node):
     """Class of nodes representing unary-operation expressions."""
     fields = ['op', 'arg']
 
-    def eval(self):
-        v = self.arg.eval()
+    def eval(self,local_var_env):
+        v = self.arg.eval(local_var_env)
         if not isinstance(v,int): raise EvalError()
 
         if self.op == 'not': return 0 if v else 1
@@ -130,7 +130,7 @@ class Print(Node):
     def anlz_procs(self): pass
 
     def exec(self, local_var_env, is_global):
-        print(repr(self.exp.eval()))
+        print(repr(self.exp.eval(local_var_env)))
 #I'm printing out a, but a=4. Find a way to print value 
 class Assign(Node):
     """Class of nodes representing assignment statements."""
@@ -141,20 +141,20 @@ class Assign(Node):
     def exec(self, local_var_env, is_global):
         if(is_global):
             if(isinstance(self.left,Var)):
-                global_var_env[self.left.name] = self.right.eval()
+                global_var_env[self.left.name] = self.right.eval(local_var_env)
             elif(isinstance(self.left,Index)):
-                if self.left.indexable.name not in global_var_env or self.left.index.eval() >= len(global_var_env[self.left.indexable.name]):
+                if self.left.indexable.name not in global_var_env or self.left.index.eval(local_var_env) >= len(global_var_env[self.left.indexable.name]):
                     raise EvalError()
                 else:
-                    global_var_env[self.left.indexable.name][self.left.index.eval()] = self.right.eval()
+                    global_var_env[self.left.indexable.name][self.left.index.eval(local_var_env)] = self.right.eval(local_var_env)
         else:
             if(isinstance(self.left,Var)):
-                local_var_env[self.left.name] = self.right.eval()
+                local_var_env[self.left.name] = self.right.eval(local_var_env)
             elif(isinstance(self.left,Index)):
-                if self.left.indexable.name not in local_var_env or self.left.index.eval() >= len(local_var_env[self.left.indexable.name]):
+                if self.left.indexable.name not in local_var_env or self.left.index.eval(local_var_env) >= len(local_var_env[self.left.indexable.name]):
                     raise EvalError()
                 else:
-                    local_var_env[self.left.indexable.name][self.left.index.eval()] = self.right.eval()
+                    local_var_env[self.left.indexable.name][self.left.index.eval(local_var_env)] = self.right.eval(local_var_env)
 
 class Block(Node):
     """Class of nodes representing block statements."""
@@ -175,7 +175,7 @@ class If(Node):
     def anlz_procs(self): self.stmt.anlz_procs()
     
     def exec(self, local_var_env, is_global):
-        if(self.exp.eval() != 0):
+        if(self.exp.eval(local_var_env) != 0):
             self.stmt.exec(local_var_env,is_global)
 
 class While(Node):
@@ -185,7 +185,7 @@ class While(Node):
     def anlz_procs(self): self.stmt.anlz_procs()
     
     def exec(self, local_var_env, is_global):
-        while(self.exp.eval() != 0):
+        while(self.exp.eval(local_var_env) != 0):
             self.stmt.exec(local_var_env, is_global)
 
 class Def(Node):
@@ -211,12 +211,14 @@ class Call(Node):
     
     def exec(self, local_var_env, is_global):
         localVars={}
+        for i in local_var_env:
+            localVars[i] = local_var_env[i]
         if self.name not in proc_env:
             raise EvalError()
         assert(len(proc_env[self.name][0]) == len(self.args))
         for x,y in zip(proc_env[self.name][0],self.args):
             #local_var_env[x]=y.eval()
-            localVars[x] = y.eval()
+            localVars[x] = y.eval(local_var_env)
         #proc_env[self.name][1].exec(local_var_env,is_global)
         proc_env[self.name][1].exec(localVars,is_global)
 #Shouldn't I pass false for                       -- ^  ?           
