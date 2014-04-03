@@ -1,10 +1,20 @@
 {
-#def func(a){
-#print(a);
-#}
-#func(4);
-i = 4;
-j = 5;
-print(i+j);
+def func(a){
+print(a);
+}
+func(4);
+def func(b){
+i=7;
+}
+#a = [1,2];
+#a[2] = 4;
+
+# i = 4;
+# j = 5;
+# a=[i,j];
+# a[0] = j;
+# print(a);
+#print(i+j);
+
 }
 

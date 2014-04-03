@@ -142,10 +142,19 @@ class Assign(Node):
         if(is_global):
             if(isinstance(self.left,Var)):
                 global_var_env[self.left.name] = self.right.eval()
+            elif(isinstance(self.left,Index)):
+                if self.left.indexable.name not in global_var_env or self.left.index.eval() >= len(global_var_env[self.left.indexable.name]):
+                    raise EvalError()
+                else:
+                    global_var_env[self.left.indexable.name][self.left.index.eval()] = self.right.eval()
         else:
             if(isinstance(self.left,Var)):
                 local_var_env[self.left.name] = self.right.eval()
-            		
+            elif(isinstance(self.left,Index)):
+                if self.left.indexable.name not in local_var_env or self.left.index.eval() >= len(local_var_env[self.left.indexable.name]):
+                    raise EvalError()
+                else:
+                    local_var_env[self.left.indexable.name][self.left.index.eval()] = self.right.eval()
 
 class Block(Node):
     """Class of nodes representing block statements."""
@@ -184,13 +193,16 @@ class Def(Node):
     fields = ['name', 'params', 'body']
 
     def anlz_procs(self):
+        if self.name in proc_env:
+            raise EvalError()
         proc_env[self.name] = (self.params, self.body)
         self.body.anlz_procs()
         
     def exec(self, local_var_env, is_global):
         pass
 #Does Def need an exec? 
-#
+#Proc must not have been defined previously
+
 class Call(Node):
     """Class of nodes representing precedure calls."""
     fields = ['name', 'args']
@@ -198,13 +210,16 @@ class Call(Node):
     def anlz_procs(self): pass
     
     def exec(self, local_var_env, is_global):
+        localVars={}
         if self.name not in proc_env:
             raise EvalError()
         assert(len(proc_env[self.name][0]) == len(self.args))
         for x,y in zip(proc_env[self.name][0],self.args):
-            local_var_env[x]=y.eval()
-        proc_env[self.name][1].exec(local_var_env,is_global)
-            
+            #local_var_env[x]=y.eval()
+            localVars[x] = y.eval()
+        #proc_env[self.name][1].exec(local_var_env,is_global)
+        proc_env[self.name][1].exec(localVars,is_global)
+#Shouldn't I pass false for                       -- ^  ?           
 #Function called, params belong in local
 #Var in body of function belong in local        
 #Var used in body of function, if not in local then in global, else error
@@ -266,7 +281,7 @@ def parse(code):
 prog = open(sys.argv[1]).read()
 
 try:
-    pdb.set_trace()
+
     # Try to parse the program.
     print('Parsing...')
     node = parse(prog)
@@ -282,6 +297,7 @@ try:
     # global_var_env: map from global variable names to their values
     # local_var_env: map from local variable names to their values
     # is_global: whether the current scope is global
+    pdb.set_trace()
     global_var_env, local_var_env, is_global = {}, {}, True
     node.exec(local_var_env, is_global)
 
