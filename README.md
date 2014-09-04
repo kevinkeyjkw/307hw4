@@ -7,4 +7,4 @@ Then it tries to parse the input program, execute the program, and print the fol
 2. Else, if any of the conditions in MustScript are violated, then the interpreter catches the error and 
 prints 'Evaluation Error'
 3. If no error is found, then the program should execute as specified.
-![s1](https://raw.github.com/kevinkeyjkw/307hw4/master/Screenshot1)
+![s1](https://raw.githubusercontent.com/kevinkeyjkw/307hw4/master/Screen%20Shot%202014-09-04%20at%209.33.56%20AM.png)
