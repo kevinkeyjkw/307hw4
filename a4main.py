@@ -76,7 +76,7 @@ class Index(Node):
 
         if not isinstance(v1,(str,list)): raise EvalError()
         if not isinstance(v2,int): raise EvalError()
-        if v2 > len(v1): raise EvalError()
+        if v2 >= len(v1): raise EvalError()
 
         return v1[v2]
 
@@ -309,7 +309,7 @@ try:
     # global_var_env: map from global variable names to their values
     # local_var_env: map from local variable names to their values
     # is_global: whether the current scope is global
-    pdb.set_trace()
+    #pdb.set_trace()
     global_var_env, local_var_env, is_global = {}, {}, True
     node.exec(local_var_env, is_global)
 
